@@ -24,10 +24,10 @@ logs = []
 @app.get("/")
 def home(request):
     global user_data
-    contents = Title("Riddler Battles"), Main(
+    contents = Title("Mathy Battles"), Main(
         Div(
-            H1("Riddler Battleground", klass="text-3xl font-bold pb-4"),
-            P("Game theory meets machine learning. Each castle is worth a certain number of points to attack and defend. Can you allocate your 100 armies and beat the machine?", klass="pb-4 text-gray-400"),
+            H1("Mathy Battles", klass="text-3xl font-bold pb-4"),
+            P("Game theory meets machine learning. Each castle is worth a certain number of points to attack and defend. The player with the most armies on a castle wins the castle and all the points that belong to it. Can you allocate your 100 armies and beat the machine?", klass="pb-4 text-gray-400"),
             Form(
                 P('Allocate your armies.', klass="pb-4 text-gray-600 font-bold"),
                 Div(*inputs, klass="grid grid-cols-10 gap-4"),
@@ -169,7 +169,7 @@ def army_update(request, data: dict):
     if sum(values) != 100:
         return redo(sum(values))
     if (not logs) or len(logs) < 10:
-        r = np.array([10, 10, 10, 10, 10, 10, 10, 10, 10, 10])
+        r = np.array([9, 10, 10, 10, 10, 10, 10, 10, 10, 11])
     else:
         inspiration = logs[-3]["winner"]
         for _ in range(2):
@@ -181,7 +181,9 @@ def army_update(request, data: dict):
     user = request.cookies.get("user")
     if user not in user_data:
         user_data[user] = []
-    user_data[user].append(player_won(values, r.astype(int)))
+    outcome = player_won(values, r.astype(int))
+    user_data[user].append(outcome)
+    print(f"{user} used {values} against {r} and {'won' if outcome else 'lost'}.")
     return Div(
         result_table(values, r.astype(int), rolling_chart=show_rolling_averages(user_data[user])),
     )
