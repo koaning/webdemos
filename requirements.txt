@@ -3,3 +3,4 @@ numpy
 matplotlib
 scipy
 fh_matplotlib
+pandas
