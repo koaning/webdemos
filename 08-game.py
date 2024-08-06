@@ -277,5 +277,6 @@ def getlogs(request):
     user_data[request.cookies.get("user")] = []
     return Response('User data has been reset.')
 
+
 if __name__ == "__main__":
     serve()
