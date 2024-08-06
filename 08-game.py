@@ -2,8 +2,9 @@ import json
 import matplotlib.pylab as plt
 from fh_matplotlib import matplotlib2fasthtml
 import pandas as pd
-from fasthtml.common import Title, Img, Main, Div, P, H1, fast_app, serve, Input, Form, Script, RedirectResponse, Select, Option, NotStr, FileResponse, Td, Span, Button, Table, Thead, Tr, Th, Br, Response, Grid, Response
+from fasthtml.common import Title, Img, Main, Div, P, H1, fast_app, serve, Input, Form, Script, RedirectResponse, A, Td, Span, Button, Table, Thead, Tr, Th, Br, Response, Grid, Response
 import numpy as np
+from scipy.stats import dirichlet
 from uuid import uuid4
 
 app, rt = fast_app(hdrs=[Script(src='https://cdn.tailwindcss.com')])
@@ -17,6 +18,7 @@ inputs = [
     for i in range(10)]
 
 user_data = {}
+tournament_data = {}
 logs = []
 
 @app.get("/")
@@ -64,11 +66,20 @@ def redo(s):
 def player_won(p1, p2):
     p1_score, p2_score = 0, 0
     for i in range(10):
-        if p1[i] >= p2[i]:
+        if p1[i] > p2[i]:
             p1_score += 1 + i
         elif p1[i] < p2[i]:
             p2_score += 1 + i
-    return p1_score >= p2_score
+    return p1_score > p2_score
+
+
+def generate_opponent(winner=[10, 10, 10, 10, 10, 10, 10, 10, 10, 10]):
+    rvs = dirichlet.rvs((np.array(winner) + 1)) * 100
+    rvs = np.floor(rvs)[0]
+    s = rvs.sum()
+    if s < 100:
+        rvs[-1] += (100 - s)
+    return rvs.astype(int).tolist()
 
 def result_table(p1, p2, rolling_chart):
     global logs
@@ -81,9 +92,9 @@ def result_table(p1, p2, rolling_chart):
             rows.append(
                 Tr(
                     Td(f"{i+1} pts"), 
-                    Td(f"{p1[i]} pts"), 
+                    Td(f"{p1[i]} pts", klass="font-bold"), 
                     Td(f"{p2[i]} pts"),
-                    Td("Victory"),
+                    Td("Victory", klass="text-green-500"),
                     Td(f"{p1_score}/{p2_score}"),
                 )
             )
@@ -93,8 +104,8 @@ def result_table(p1, p2, rolling_chart):
                 Tr(
                     Td(f"{i+1} pts"), 
                     Td(f"{p1[i]} pts"), 
-                    Td(f"{p2[i]} pts"),
-                    Td("Defeat"),
+                    Td(f"{p2[i]} pts", klass="font-bold"),
+                    Td("Defeat", klass="text-red-500"),
                     Td(f"{p1_score}/{p2_score}"),
                 )
             )
@@ -104,12 +115,15 @@ def result_table(p1, p2, rolling_chart):
                     Td(f"{i+1} pts"), 
                     Td(f"{p1[i]} pts"), 
                     Td(f"{p2[i]} pts"),
-                    Td("Draw"),
+                    Td("Draw", klass="text-gray-400"),
                     Td(f"{p1_score}/{p2_score}"),
                 )
             )
+    
     logs.append({"winner": p1, "loser": p2} if p1_score > p2_score else {"winner": p2, "loser": p1})
-    print(logs[-1])
+    if len(logs) > 100:
+        logs.pop(0)
+    
     return Div(
         Div(
             Grid(
@@ -137,12 +151,12 @@ def result_table(p1, p2, rolling_chart):
                 )
             ),
             *rows
-        )
+        ),
+        A("Got what it takes to compete?", href="/compete", klass="text-blue-500 font-bold"),
     )
 
 @matplotlib2fasthtml
 def show_rolling_averages(user_data):
-    print(pd.DataFrame({"outcomes": user_data}).rolling(10).mean())
     df = pd.DataFrame({"outcomes": user_data})
     plt.figure(figsize=(12, 5))
     plt.plot(df.rolling(10).mean()['outcomes'], label='Short term')
@@ -154,9 +168,16 @@ def army_update(request, data: dict):
     values = [int(i) for i in data.values()]
     if sum(values) != 100:
         return redo(sum(values))
-    r = np.random.random(10)
-    r /= r.sum()
-    r *= 100
+    if (not logs) or len(logs) < 10:
+        r = np.array([10, 10, 10, 10, 10, 10, 10, 10, 10, 10])
+    else:
+        inspiration = logs[-3]["winner"]
+        for _ in range(2):
+            # We look at the past to see if we can beat the opponent
+            # A bit lazy, but we try to generate a new opponent until we win
+            r = np.array(generate_opponent(inspiration))
+            if player_won(r, values):
+                break
     user = request.cookies.get("user")
     if user not in user_data:
         user_data[user] = []
@@ -175,6 +196,78 @@ def army_update_10(request, data: dict):
 @app.get("/logs")
 def getlogs():
     return Response(json.dumps(logs))
+
+
+@app.get("/compete")
+def getlogs(request):
+    global user_data
+    contents = Title("Compete"), Main(
+        Div(
+            H1("Riddler Tournament", klass="text-3xl font-bold pb-4"),
+            P("Have you faced the computer and did you manage to win long term? Dare to compete on a grand scale against your fellow humans? Enter the tournament below to find out!", klass="pb-4 text-gray-400"),
+            Form(
+                P('Allocate your armies.', klass="pb-4 text-gray-600 font-bold"),
+                Div(*inputs, klass="grid grid-cols-10 gap-4"),
+                Grid(
+                    Button("Submit", 
+                        hx_post="/tournament-update", hx_target="#response", hx_swap="innerHTML", hx_form="sklearn-form",
+                        klass="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded w-full"),
+                ),
+                id="sklearn-form"
+            ),
+        klass=''),
+        Div(
+            Div(id="response"),
+            klass=''
+        ),
+        klass="m-8"
+    )
+    if request.cookies.get("user") is None:
+        resp = RedirectResponse('/compete')
+        uid = str(uuid4())
+        user_data[uid] = []
+        resp.set_cookie("user", uid)
+        return resp
+    return contents
+
+def tournament_table(highlight=None):
+    rows = []
+    for user in tournament_data:
+        ratio = np.mean([player_won(tournament_data[user], tournament_data[name]) for name in tournament_data if name != user])
+        rows.append(
+            (user, ratio)
+        )
+    
+    rows = [
+        Tr(
+            Td(user, klass="font-bold" if highlight == user else None), 
+            Td(np.round(ratio * 100, 4), klass="font-bold" if highlight == user else None)
+        ) for user, ratio in sorted(rows, key=lambda x: x[1], reverse=True)
+    ]
+    return Table(
+        Thead(
+            Tr(
+                Th('Player'),   
+                Th('Win ratio'),
+            )
+        ),
+        *rows
+    )
+
+@app.post("/tournament-update")
+def tournament_update(request, data: dict):
+    global tournament_data
+    for i in range(10):
+        tournament_data[f'easy-bot-{i}'] = generate_opponent([10 for _ in range(10)])
+    user = request.cookies.get("user")
+    tournament_data[user] = [int(i) for i in data.values()]
+    ratio = np.mean([player_won([int(i) for i in data.values()], tournament_data[name]) for name in tournament_data if name != user])
+    return Div(
+        f'We compared against {len(tournament_data)} other players and you were able to beat {np.round(ratio, 2) * 100}% of them.',
+        tournament_table(highlight=user)
+    )
+
+
 
 @app.post("/reset")
 def getlogs(request):

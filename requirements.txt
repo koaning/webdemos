@@ -1,0 +1,5 @@
+python-fasthtml
+numpy
+matplotlib
+scipy
+fh_matplotlib
