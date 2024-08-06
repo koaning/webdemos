@@ -279,4 +279,4 @@ def getlogs(request):
 
 
 if __name__ == "__main__":
-    serve()
+    serve(port=8080)
