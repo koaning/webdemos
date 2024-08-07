@@ -137,7 +137,7 @@ def result_table(p1, p2, rolling_chart):
                 ),
                 Div(
                     rolling_chart
-                )
+                ),
             ),
         ),
         Table(
@@ -259,11 +259,14 @@ def tournament_table(highlight=None):
 @app.post("/tournament-update")
 def tournament_update(request, data: dict):
     global tournament_data
+    user = request.cookies.get("user")
+    values = [int(i) for i in data.values()]
+    if sum(values) != 100:
+        return redo(sum(values))
     for i in range(10):
         tournament_data[f'easy-bot-{i}'] = generate_opponent([10 for _ in range(10)])
-    user = request.cookies.get("user")
-    tournament_data[user] = [int(i) for i in data.values()]
-    ratio = np.mean([player_won([int(i) for i in data.values()], tournament_data[name]) for name in tournament_data if name != user])
+    tournament_data[user] = values
+    ratio = np.mean([player_won(values, tournament_data[name]) for name in tournament_data if name != user])
     return Div(
         f'We compared against {len(tournament_data)} other players and you were able to beat {np.round(ratio, 2) * 100}% of them.',
         tournament_table(highlight=user)
