@@ -136,12 +136,6 @@ def home(request):
                     Button("Submit", 
                         hx_post="/army-update", hx_target="#response", hx_swap="innerHTML", hx_form="sklearn-form",
                         klass="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded w-full"),
-                    Button("Submit 10x", 
-                        hx_post="/army-update-10", hx_target="#response", hx_swap="innerHTML", hx_form="sklearn-form",
-                        klass="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded w-full"),
-                    Button("Reset", 
-                        hx_post="/reset", hx_target="#response", hx_swap="innerHTML", hx_form="sklearn-form",
-                        klass="bg-red-400 hover:bg-red-700 text-white font-bold py-2 px-4 rounded w-full"),
                 ),
                 id="sklearn-form"
             ),
