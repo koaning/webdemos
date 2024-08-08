@@ -21,48 +21,7 @@ user_data = {}
 tournament_data = {}
 logs = []
 
-@app.get("/")
-def home(request):
-    global user_data
-    contents = Title("Mathy Battles"), Main(
-        Div(
-            H1("Mathy Battles", klass="text-3xl font-bold pb-4"),
-            P("Game theory meets machine learning. Each castle is worth a certain number of points to attack and defend. The player with the most armies on a castle wins the castle and all the points that belong to it. Can you allocate your 100 armies and beat the machine?", klass="pb-4 text-gray-400"),
-            Form(
-                P('Allocate your armies.', klass="pb-4 text-gray-600 font-bold"),
-                Div(*inputs, klass="grid grid-cols-10 gap-4"),
-                Grid(
-                    Button("Submit", 
-                        hx_post="/army-update", hx_target="#response", hx_swap="innerHTML", hx_form="sklearn-form",
-                        klass="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded w-full"),
-                    Button("Submit 10x", 
-                        hx_post="/army-update-10", hx_target="#response", hx_swap="innerHTML", hx_form="sklearn-form",
-                        klass="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded w-full"),
-                    Button("Reset", 
-                        hx_post="/reset", hx_target="#response", hx_swap="innerHTML", hx_form="sklearn-form",
-                        klass="bg-red-400 hover:bg-red-700 text-white font-bold py-2 px-4 rounded w-full"),
-                ),
-                id="sklearn-form"
-            ),
-        klass=''),
-        Div(
-            Div(id="response"),
-            klass=''
-        ),
-        klass="m-8"
-    )
-    if request.cookies.get("user") is None:
-        resp = RedirectResponse('/')
-        uid = str(uuid4())
-        user_data[uid] = []
-        resp.set_cookie("user", uid)
-        return resp
-    return contents
-
-
-def redo(s):
-    return Span(f"Received {s} armies. Must allocate 100 in total!", klass="text-red-500 font-bold m-4")
-
+# Helper functions
 def player_won(p1, p2):
     p1_score, p2_score = 0, 0
     for i in range(10):
@@ -80,6 +39,7 @@ def generate_opponent(winner=[10, 10, 10, 10, 10, 10, 10, 10, 10, 10]):
     if s < 100:
         rvs[-1] += (100 - s)
     return rvs.astype(int).tolist()
+
 
 def result_table(p1, p2, rolling_chart):
     global logs
@@ -163,6 +123,58 @@ def show_rolling_averages(user_data):
     plt.plot(df.expanding().mean()['outcomes'], label='Long term')
     plt.legend()
 
+
+# Routes related to the landing page
+@app.get("/")
+def home(request):
+    global user_data
+    contents = Title("Nerdsnipe Castles"), Main(
+        Div(
+            H1("Nerdsnipe Castles", klass="text-3xl font-bold pb-4"),
+            P("Game theory meets machine learning. Each castle is worth a certain number of points to attack and defend. The player with the most armies on a castle wins the castle and all the points that belong to it. Can you allocate your 100 armies and beat the machine?", klass="pb-4 text-gray-400"),
+            Form(
+                P('Allocate your armies.', klass="pb-4 text-gray-600 font-bold"),
+                Div(*inputs, klass="grid grid-cols-10 gap-4"),
+                Grid(
+                    Button("Submit", 
+                        hx_post="/army-update", hx_target="#response", hx_swap="innerHTML", hx_form="sklearn-form",
+                        klass="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded w-full"),
+                    Button("Submit 10x", 
+                        hx_post="/army-update-10", hx_target="#response", hx_swap="innerHTML", hx_form="sklearn-form",
+                        klass="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded w-full"),
+                    Button("Reset", 
+                        hx_post="/reset", hx_target="#response", hx_swap="innerHTML", hx_form="sklearn-form",
+                        klass="bg-red-400 hover:bg-red-700 text-white font-bold py-2 px-4 rounded w-full"),
+                ),
+                id="sklearn-form"
+            ),
+        klass=''),
+        Div(
+            Div(id="response"),
+            klass=''
+        ),
+        klass="m-8"
+    )
+    if request.cookies.get("user") is None:
+        resp = RedirectResponse('/')
+        uid = str(uuid4())
+        user_data[uid] = []
+        resp.set_cookie("user", uid)
+        return resp
+    return contents
+
+
+def redo(s):
+    return Span(f"Received {s} armies. Must allocate 100 in total!", klass="text-red-500 font-bold m-4")
+
+
+@app.post("/reset")
+def reset(request):
+    global user_data
+    user_data[request.cookies.get("user")] = []
+    return Response('User data has been reset.')
+
+
 @app.post("/army-update")
 def army_update(request, data: dict):
     values = [int(i) for i in data.values()]
@@ -203,9 +215,9 @@ def getlogs():
 @app.get("/compete")
 def getlogs(request):
     global user_data
-    contents = Title("Compete"), Main(
+    contents = Title("Nerdsnipe Castles"), Main(
         Div(
-            H1("Riddler Tournament", klass="text-3xl font-bold pb-4"),
+            H1("Nerdsnipe Castle - The Tournament[tm]", klass="text-3xl font-bold pb-4"),
             P("Have you faced the computer and did you manage to win long term? Dare to compete on a grand scale against your fellow humans? Enter the tournament below to find out!", klass="pb-4 text-gray-400"),
             Form(
                 P('Allocate your armies.', klass="pb-4 text-gray-600 font-bold"),
@@ -231,6 +243,7 @@ def getlogs(request):
         resp.set_cookie("user", uid)
         return resp
     return contents
+
 
 def tournament_table(highlight=None):
     rows = []
@@ -271,14 +284,6 @@ def tournament_update(request, data: dict):
         f'We compared against {len(tournament_data)} other players and you were able to beat {np.round(ratio, 2) * 100}% of them.',
         tournament_table(highlight=user)
     )
-
-
-
-@app.post("/reset")
-def getlogs(request):
-    global user_data
-    user_data[request.cookies.get("user")] = []
-    return Response('User data has been reset.')
 
 
 if __name__ == "__main__":
