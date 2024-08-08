@@ -41,7 +41,7 @@ def generate_opponent(winner=[10, 10, 10, 10, 10, 10, 10, 10, 10, 10]):
     return rvs.astype(int).tolist()
 
 
-def result_table(p1, p2, rolling_chart):
+def result_table(p1, p2):
     global logs
     p1, p2 = [int(i) for i in p1], [int(i) for i in p2]
     p1_score, p2_score = 0, 0
@@ -94,9 +94,6 @@ def result_table(p1, p2, rolling_chart):
                     ),
                     P("The battle has ended!", klass="text-3xl font-bold pb-4 text-center"),
                     P("You won!" if p1_score > p2_score else "You did not win ...", klass="text-3xl font-bold pb-4 text-center"),
-                ),
-                Div(
-                    rolling_chart
                 ),
             ),
         ),
@@ -197,7 +194,7 @@ def army_update(request, data: dict):
     user_data[user].append(outcome)
     print(f"{user} used {values} against {r} and {'won' if outcome else 'lost'}.")
     return Div(
-        result_table(values, r.astype(int), rolling_chart=show_rolling_averages(user_data[user])),
+        result_table(values, r.astype(int)),
     )
 
 @app.post("/army-update-10")
