@@ -108,8 +108,7 @@ def result_table(p1, p2):
                 )
             ),
             *rows
-        ),
-        A("Got what it takes to compete?", href="/compete", klass="text-blue-500 font-bold"),
+        )
     )
 
 @matplotlib2fasthtml
@@ -128,7 +127,7 @@ def home(request):
     contents = Title("Nerdsnipe Castles"), Main(
         Div(
             H1("Nerdsnipe Castles", klass="text-3xl font-bold pb-4"),
-            P("Game theory meets machine learning. Each castle is worth a certain number of points to attack and defend. The player with the most armies on a castle wins the castle and all the points that belong to it. Can you allocate your 100 armies and beat the machine?", klass="pb-4 text-gray-400"),
+            P("Game theory meets machine learning. Each castle is worth a certain number of points to attack and defend. The player with the most armies on a castle wins the castle and all the points that belong to it. Can you allocate your 100 armies and beat the machine? You can practice below, but if you think that you've got what it takes ...", A("go here to compete for real.", href="/compete", klass="text-blue-500 font-bold"), klass="pb-4 text-gray-400"),
             Form(
                 P('Allocate your armies.', klass="pb-4 text-gray-600 font-bold"),
                 Div(*inputs, klass="grid grid-cols-10 gap-4"),
@@ -267,6 +266,9 @@ def tournament_update(request, data: dict):
     values = [int(i) for i in data.values()]
     if sum(values) != 100:
         return redo(sum(values))
+    if any(v < 0 for v in values):
+        if min(values) < -10:
+            return Span(f"While we appreciate the hacker mindset, we have a cap on cheating.", klass="text-red-500 font-bold m-4")
     for i in range(10):
         tournament_data[f'easy-bot-{i}'] = generate_opponent([10 for _ in range(10)])
     tournament_data[user] = values
@@ -276,6 +278,10 @@ def tournament_update(request, data: dict):
         tournament_table(highlight=user)
     )
 
+
+@app.get("/who-would-guess-this-endpoint")
+def data_endpoint():
+    return json.dumps(tournament_data)
 
 if __name__ == "__main__":
     serve(port=8080)
