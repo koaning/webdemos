@@ -208,7 +208,7 @@ def getlogs(request):
     contents = Title("Nerdsnipe Castles"), Main(
         Div(
             H1("Nerdsnipe Castle - The Tournament[tm]", klass="text-3xl font-bold pb-4"),
-            P("Have you faced the computer and did you manage to win long term? Dare to compete on a grand scale against your fellow humans? Enter the tournament below to find out!", klass="pb-4 text-gray-400"),
+            P("Have you faced the computer and did you manage to win long term? Dare to compete on a grand scale against your fellow humans? Enter the tournament below to find out! Hint: simulations might be helpful ... but never underestimate booksmarts when you can apply streetsmarts. It may just help you solve the right problem.", klass="pb-4 text-gray-400"),
             Form(
                 P('Allocate your armies.', klass="pb-4 text-gray-600 font-bold"),
                 Div(*inputs, klass="grid grid-cols-10 gap-4"),
@@ -270,7 +270,7 @@ def tournament_update(request, data: dict):
         if min(values) < -10:
             return Span(f"While we appreciate the hacker mindset, we have a cap on cheating.", klass="text-red-500 font-bold m-4")
     for i in range(10):
-        tournament_data[f'easy-bot-{i}'] = generate_opponent([10 for _ in range(10)])
+        tournament_data[f'easy-bot-{i}'] = generate_opponent([10 for _ in range(100)])
     tournament_data[user] = values
     ratio = np.mean([player_won(values, tournament_data[name]) for name in tournament_data if name != user])
     return Div(

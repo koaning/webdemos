@@ -1,0 +1,30 @@
+name: Download New Data
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron:  '0 */2 * * *'
+
+jobs:
+  scheduled:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out this repo
+      uses: actions/checkout@v2
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.9
+        cache: 'pip'
+    - name: Fetch latest data
+      run: |- 
+        wget https://pydata.probabl.ai/who-would-guess-this-endpoint
+        mv who-would-guess-this-endpoint tournament.json
+    - name: Commit and push if it changed
+      run: |-
+        git config user.name "Automated"
+        git config user.email "actions@users.noreply.github.com"
+        git add -A
+        timestamp=$(date -u)
+        git commit -m "Latest data: ${timestamp}" || exit 0
+        git push
