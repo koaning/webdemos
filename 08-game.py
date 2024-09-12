@@ -6,6 +6,7 @@ from fasthtml.common import Title, Img, Main, Div, P, H1, fast_app, serve, Input
 import numpy as np
 from scipy.stats import dirichlet
 from uuid import uuid4
+from pathlib import Path
 
 app, rt = fast_app(hdrs=[Script(src='https://cdn.tailwindcss.com')])
 
@@ -19,6 +20,8 @@ inputs = [
 
 user_data = {}
 tournament_data = {}
+if Path("tournament.json").exists():
+    tournament_data = json.loads(Path("tournament.json").read_text())
 logs = []
 
 # Helper functions
@@ -269,8 +272,8 @@ def tournament_update(request, data: dict):
     if any(v < 0 for v in values):
         if min(values) < -10:
             return Span(f"While we appreciate the hacker mindset, we have a cap on cheating.", klass="text-red-500 font-bold m-4")
-    for i in range(10):
-        tournament_data[f'easy-bot-{i}'] = generate_opponent([10 for _ in range(100)])
+    for i in range(100):
+        tournament_data[f'easy-bot-{i}'] = generate_opponent([10 for _ in range(10)])
     tournament_data[user] = values
     ratio = np.mean([player_won(values, tournament_data[name]) for name in tournament_data if name != user])
     return Div(
