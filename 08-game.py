@@ -223,6 +223,7 @@ def getlogs(request):
             H1("PyData 2024 Challenge - The Tournament[tm]", klass="text-3xl font-bold pb-4"),
             P("Have you faced the computer and did you manage to win long term? Dare to compete on a grand scale against your fellow humans? Enter the tournament below to find out!", klass="pb-4 text-gray-400 text-xl"),
             P("Hint: simulations might be helpful, but streetsmarts typically beats booksmarts. Be sure to think about the actual problem that you are trying to solve here.", klass="pb-4 text-gray-400 text-xl"),
+            P("If you want to discuss the challenge, or if you think something broke, feel free to join and ping us on our", A("Discord", href="https://discord.gg/cUH3UhFD", klass="text-blue-500 font-bold"), klass="text-xl text-gray-400"), 
             Form(
                 P('Allocate your armies.', klass="pb-4 text-gray-600 font-bold"),
                 Div(*inputs, klass="grid md:grid-cols-10 grid-cols-5 md:gap-4 gap-2"),
