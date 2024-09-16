@@ -250,7 +250,7 @@ def getlogs(request):
     )
     if request.cookies.get("user") is None:
         resp = RedirectResponse('/compete')
-        uid = str(uuid4())
+        uid = randomname.generate('ipsum/corporate', 'a/speed', 'a/shape', 'n/set_theory', 'v/movement').lower() + '-' + str(uuid4())[:6]
         user_data[uid] = []
         resp.set_cookie("user", uid)
         return resp
