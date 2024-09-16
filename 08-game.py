@@ -2,11 +2,13 @@ import json
 import matplotlib.pylab as plt
 from fh_matplotlib import matplotlib2fasthtml
 import pandas as pd
-from fasthtml.common import Title, Img, Main, Div, P, H1, fast_app, serve, Input, Form, Script, RedirectResponse, A, Td, Span, Button, Table, Thead, Tr, Th, Br, Response, Grid, Response
+from fasthtml.common import Title, Img, Main, Div, P, H1, fast_app, serve, Input, Form, Script, RedirectResponse, A, Td, Span, Button, Table, Thead, Tr, Th, Br, Response, Grid, Response, B
 import numpy as np
 from scipy.stats import dirichlet
 from uuid import uuid4
 from pathlib import Path
+import randomname
+
 
 app, rt = fast_app(hdrs=[Script(src='https://cdn.tailwindcss.com')])
 
@@ -127,13 +129,14 @@ def show_rolling_averages(user_data):
 @app.get("/")
 def home(request):
     global user_data
-    contents = Title("Nerdsnipe Castles"), Main(
+    contents = Title("PyData 2024"), Main(
         Div(
-            H1("Nerdsnipe Castles", klass="text-3xl font-bold pb-4"),
-            P("Game theory meets machine learning. Each castle is worth a certain number of points to attack and defend. The player with the most armies on a castle wins the castle and all the points that belong to it. Can you allocate your 100 armies and beat the machine? You can practice below, but if you think that you've got what it takes ...", A("go here to compete for real.", href="/compete", klass="text-blue-500 font-bold"), klass="pb-4 text-gray-400"),
+            H1("PyData 2024 Challenge", klass="text-3xl font-bold pb-4"),
+            P("Game theory meets machine learning. You want to capture castles, but some castles are worth more than others. You have armies at your disposal though, and if you allocate the most armies on a castle you can capture it. Both you and your opponent have a", B("total sum of 100 armies", klass="text-gray-500"), ". Where will you place your armies?", klass="pb-4 text-gray-400 text-xl"),
+            P("If you want to practice, you can try to beat a bot below. Be careful though, the bot will also learn from you.  If you've practiced and think that you've got what it takes ...", A("go here to compete for real.", href="/compete", klass="text-blue-500 font-bold"), klass="pb-4 text-gray-400 text-xl"),
             Form(
                 P('Allocate your armies.', klass="pb-4 text-gray-600 font-bold"),
-                Div(*inputs, klass="grid grid-cols-10 gap-4"),
+                Div(*inputs, klass="grid md:grid-cols-10 grid-cols-5 md:gap-4 gap-2"),
                 Grid(
                     Button("Submit", 
                         hx_post="/army-update", hx_target="#response", hx_swap="innerHTML", hx_form="sklearn-form",
@@ -146,11 +149,18 @@ def home(request):
             Div(id="response"),
             klass=''
         ),
+        Br(),
+        P("This challenge is brought to you by probabl. We do scikit-learn and a lot more! Come talk to us on", A("Discord", href="https://discord.gg/cUH3UhFD", klass="text-blue-500 font-bold"), klass="text-md text-gray-400"), 
+        Br(),
+        A(
+            Img(src="https://cdn.prod.website-files.com/6593dc9eeedcab58d8a9a149/6593dd75372b8e57c5329733_Logotype.svg"),
+            href="https://probabl.ai/"
+        ),
         klass="m-8"
     )
     if request.cookies.get("user") is None:
         resp = RedirectResponse('/')
-        uid = str(uuid4())
+        uid = randomname.generate('ipsum/corporate', 'a/speed', 'a/shape', 'n/set_theory', 'v/movement').lower() + '-' +  str(uuid4())[:6]
         user_data[uid] = []
         resp.set_cookie("user", uid)
         return resp
@@ -210,11 +220,12 @@ def getlogs(request):
     global user_data
     contents = Title("Nerdsnipe Castles"), Main(
         Div(
-            H1("Nerdsnipe Castle - The Tournament[tm]", klass="text-3xl font-bold pb-4"),
-            P("Have you faced the computer and did you manage to win long term? Dare to compete on a grand scale against your fellow humans? Enter the tournament below to find out! Hint: simulations might be helpful ... but never underestimate booksmarts when you can apply streetsmarts. It may just help you solve the right problem.", klass="pb-4 text-gray-400"),
+            H1("PyData 2024 Challenge - The Tournament[tm]", klass="text-3xl font-bold pb-4"),
+            P("Have you faced the computer and did you manage to win long term? Dare to compete on a grand scale against your fellow humans? Enter the tournament below to find out!", klass="pb-4 text-gray-400 text-xl"),
+            P("Hint: simulations might be helpful, but streetsmarts typically beats booksmarts. Be sure to think about the actual problem that you are trying to solve here.", klass="pb-4 text-gray-400 text-xl"),
             Form(
                 P('Allocate your armies.', klass="pb-4 text-gray-600 font-bold"),
-                Div(*inputs, klass="grid grid-cols-10 gap-4"),
+                Div(*inputs, klass="grid md:grid-cols-10 grid-cols-5 md:gap-4 gap-2"),
                 Grid(
                     Button("Submit", 
                         hx_post="/tournament-update", hx_target="#response", hx_swap="innerHTML", hx_form="sklearn-form",
@@ -226,6 +237,13 @@ def getlogs(request):
         Div(
             Div(id="response"),
             klass=''
+        ),
+        Br(),
+        P("This challenge is brought to you by probabl. We do scikit-learn and a lot more! Come talk to us on", A("Discord", href="https://discord.gg/cUH3UhFD", klass="text-blue-500 font-bold"), klass="text-md text-gray-400"), 
+        Br(),
+        A(
+            Img(src="https://cdn.prod.website-files.com/6593dc9eeedcab58d8a9a149/6593dd75372b8e57c5329733_Logotype.svg"),
+            href="https://probabl.ai/"
         ),
         klass="m-8"
     )
@@ -273,11 +291,12 @@ def tournament_update(request, data: dict):
         if min(values) < -10:
             return Span(f"While we appreciate the hacker mindset, we have a cap on cheating.", klass="text-red-500 font-bold m-4")
     for i in range(100):
-        tournament_data[f'easy-bot-{i}'] = generate_opponent([10 for _ in range(10)])
+        if i > 10 or f"easy-bot-{i}" not in tournament_data.keys():
+            tournament_data[f'easy-bot-{i}'] = generate_opponent([10 for _ in range(10)])
     tournament_data[user] = values
     ratio = np.mean([player_won(values, tournament_data[name]) for name in tournament_data if name != user])
     return Div(
-        f'We compared against {len(tournament_data)} other players and you were able to beat {np.round(ratio, 2) * 100}% of them.',
+        f'We compared against {len(tournament_data)} other players and you were able to beat {np.round(ratio, 2) * 100:.1f}% of them.',
         tournament_table(highlight=user)
     )
 
