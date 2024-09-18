@@ -1,3 +1,4 @@
+import random
 import json
 import matplotlib.pylab as plt
 from fh_matplotlib import matplotlib2fasthtml
@@ -131,11 +132,12 @@ def home(request):
     global user_data
     contents = Title("PyData 2024"), Main(
         Div(
-            H1("PyData 2024 Challenge - the practice round", klass="text-3xl font-bold pb-4"),
+            H1("PyData 2024 Challenge", klass="text-6xl font-bold pb-4"),
             Details(
                 Summary("Curious to learn what you can win?", klass="text-blue-500 font-bold"),
                 Img(src="/static/prize.png", width=200),
             ),
+            H1("Practice Round", klass="text-3xl font-bold pb-4"),
             P("Game theory meets machine learning. You want to capture castles, but some castles are worth more than others. You have armies at your disposal though, and if you allocate the most armies on a castle you can capture it. Both you and your opponent have a ", B("total sum of 100 armies", klass="text-gray-500"), ". Where will you place your armies?", klass="pb-4 text-gray-400 text-xl"),
             P("If you want to practice, you can try to beat a bot below. Be careful though, the bot will also learn from you.", klass="pb-4 text-gray-400 text-xl"),
             P("Think that you've got what it takes? ... ", A("go here to compete for real.", href="/compete", klass="text-blue-500 font-bold"), klass="pb-4 text-gray-400 text-xl"),
@@ -189,8 +191,13 @@ def army_update(request, data: dict):
     values = [int(i) for i in data.values()]
     if sum(values) != 100:
         return redo(sum(values))
-    if (not logs) or len(logs) < 10:
-        r = np.array([9, 10, 10, 10, 10, 10, 10, 10, 10, 11])
+    if (not logs) or len(logs) < 3:
+        r = random.choice([
+            np.array([9, 10, 10, 10, 10, 10, 10, 10, 10, 11]),
+            np.array([0, 0, 10, 10, 10, 10, 10, 10, 10, 30]),
+            np.array([0, 0, 0, 0, 10, 10, 10, 10, 30, 30]),
+            np.array([0, 0, 0, 10, 10, 10, 10, 10, 20, 30])
+        ])
     else:
         inspiration = logs[-3]["winner"]
         for _ in range(2):
@@ -226,10 +233,15 @@ def getlogs(request):
     global user_data
     contents = Title("Nerdsnipe Castles"), Main(
         Div(
-            H1("PyData 2024 Challenge - The Tournament[tm]", klass="text-3xl font-bold pb-4"),
+            H1("PyData 2024 Challenge", klass="text-6xl font-bold pb-4"),
+            Details(
+                Summary("Curious to learn what you can win?", klass="text-blue-500 font-bold"),
+                Img(src="/static/prize.png", width=200),
+            ),
+            H1("Become a winner!", klass="text-3xl font-bold pb-4"),
             P("Have you faced the computer and did you manage to win long term? Dare to compete on a grand scale against your fellow humans? Enter the tournament below to find out!", klass="pb-4 text-gray-400 text-xl"),
             P("Hint: simulations might be helpful, but streetsmarts typically beats booksmarts. Be sure to think about the actual problem that you are trying to solve here.", klass="pb-4 text-gray-400 text-xl"),
-            P("If you want to discuss the challenge, or if you think something broke, feel free to join and ping us on our ", A("Discord", href="https://discord.gg/cUH3UhFD", klass="text-blue-500 font-bold"), klass="text-xl text-gray-400"), 
+            P("If you want to discuss the challenge, or if you think something broke, feel free to join and ping us on our ", A("Discord", href="https://discord.gg/cUH3UhFD", klass="text-blue-500 font-bold"), '.', klass="text-xl text-gray-400"), 
             Br(),
             Form(
                 P('Allocate your armies.', klass="pb-4 text-gray-600 font-bold"),
