@@ -2,7 +2,7 @@ import json
 import matplotlib.pylab as plt
 from fh_matplotlib import matplotlib2fasthtml
 import pandas as pd
-from fasthtml.common import Title, Img, Main, Div, P, H1, fast_app, serve, Input, Form, Script, RedirectResponse, A, Td, Span, Button, Table, Thead, Tr, Th, Br, Response, Grid, Response, B
+from fasthtml.common import Title, Details, Summary, Img, Main, Div, P, H1, fast_app, serve, Input, Form, Script, RedirectResponse, A, Td, Span, Button, Table, Thead, Tr, Th, Br, Response, Grid, Response, B
 import numpy as np
 from scipy.stats import dirichlet
 from uuid import uuid4
@@ -131,9 +131,15 @@ def home(request):
     global user_data
     contents = Title("PyData 2024"), Main(
         Div(
-            H1("PyData 2024 Challenge", klass="text-3xl font-bold pb-4"),
-            P("Game theory meets machine learning. You want to capture castles, but some castles are worth more than others. You have armies at your disposal though, and if you allocate the most armies on a castle you can capture it. Both you and your opponent have a", B("total sum of 100 armies", klass="text-gray-500"), ". Where will you place your armies?", klass="pb-4 text-gray-400 text-xl"),
-            P("If you want to practice, you can try to beat a bot below. Be careful though, the bot will also learn from you.  If you've practiced and think that you've got what it takes ...", A("go here to compete for real.", href="/compete", klass="text-blue-500 font-bold"), klass="pb-4 text-gray-400 text-xl"),
+            H1("PyData 2024 Challenge - the practice round", klass="text-3xl font-bold pb-4"),
+            Details(
+                Summary("Curious to learn what you can win?", klass="text-blue-500 font-bold"),
+                Img(src="/static/prize.png", width=200),
+            ),
+            P("Game theory meets machine learning. You want to capture castles, but some castles are worth more than others. You have armies at your disposal though, and if you allocate the most armies on a castle you can capture it. Both you and your opponent have a ", B("total sum of 100 armies", klass="text-gray-500"), ". Where will you place your armies?", klass="pb-4 text-gray-400 text-xl"),
+            P("If you want to practice, you can try to beat a bot below. Be careful though, the bot will also learn from you.", klass="pb-4 text-gray-400 text-xl"),
+            P("Think that you've got what it takes? ... ", A("go here to compete for real.", href="/compete", klass="text-blue-500 font-bold"), klass="pb-4 text-gray-400 text-xl"),
+            Br(),
             Form(
                 P('Allocate your armies.', klass="pb-4 text-gray-600 font-bold"),
                 Div(*inputs, klass="grid md:grid-cols-10 grid-cols-5 md:gap-4 gap-2"),
@@ -224,6 +230,7 @@ def getlogs(request):
             P("Have you faced the computer and did you manage to win long term? Dare to compete on a grand scale against your fellow humans? Enter the tournament below to find out!", klass="pb-4 text-gray-400 text-xl"),
             P("Hint: simulations might be helpful, but streetsmarts typically beats booksmarts. Be sure to think about the actual problem that you are trying to solve here.", klass="pb-4 text-gray-400 text-xl"),
             P("If you want to discuss the challenge, or if you think something broke, feel free to join and ping us on our ", A("Discord", href="https://discord.gg/cUH3UhFD", klass="text-blue-500 font-bold"), klass="text-xl text-gray-400"), 
+            Br(),
             Form(
                 P('Allocate your armies.', klass="pb-4 text-gray-600 font-bold"),
                 Div(*inputs, klass="grid md:grid-cols-10 grid-cols-5 md:gap-4 gap-2"),
@@ -307,4 +314,4 @@ def data_endpoint():
     return json.dumps(tournament_data)
 
 if __name__ == "__main__":
-    serve(port=8080)
+    serve(port=8080, reload=True)
