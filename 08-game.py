@@ -158,7 +158,7 @@ def home(request):
             klass=''
         ),
         Br(),
-        P("This challenge is brought to you by probabl. We do scikit-learn and a lot more! Come talk to us on ", A("Discord", href="https://discord.gg/cUH3UhFD", klass="text-blue-500 font-bold"), klass="text-md text-gray-400"), 
+        P("This challenge is brought to you by probabl. We do scikit-learn and a lot more! Come talk to us on ", A("Discord", href="https://discord.gg/wcvrjNX8", klass="text-blue-500 font-bold"), klass="text-md text-gray-400"), 
         Br(),
         A(
             Img(src="https://cdn.prod.website-files.com/6593dc9eeedcab58d8a9a149/6593dd75372b8e57c5329733_Logotype.svg"),
@@ -241,7 +241,7 @@ def getlogs(request):
             H1("Become a winner!", klass="text-3xl font-bold pb-4"),
             P("Have you faced the computer and did you manage to win long term? Dare to compete on a grand scale against your fellow humans? Enter the tournament below to find out!", klass="pb-4 text-gray-400 text-xl"),
             P("Hint: simulations might be helpful, but streetsmarts typically beats booksmarts. Be sure to think about the actual problem that you are trying to solve here.", klass="pb-4 text-gray-400 text-xl"),
-            P("If you want to discuss the challenge, or if you think something broke, feel free to join and ping us on our ", A("Discord", href="https://discord.gg/cUH3UhFD", klass="text-blue-500 font-bold"), '.', klass="text-xl text-gray-400"), 
+            P("If you want to discuss the challenge, or if you think something broke, feel free to join and ping us on our ", A("Discord", href="https://discord.gg/wcvrjNX8", klass="text-blue-500 font-bold"), '.', klass="text-xl text-gray-400"), 
             Br(),
             Form(
                 P('Allocate your armies.', klass="pb-4 text-gray-600 font-bold"),
