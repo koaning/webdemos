@@ -135,7 +135,7 @@ def home(request):
             H1("PyData 2024 Challenge", klass="text-6xl font-bold pb-4"),
             Details(
                 Summary("Curious to learn what you can win?", klass="text-blue-500 font-bold"),
-                Img(src="/static/prize.png", width=200),
+                Img(src="/static/IMG_0953.png", width=600),
             ),
             H1("Practice Round", klass="text-3xl font-bold pb-4"),
             P("Game theory meets machine learning. You want to capture castles, but some castles are worth more than others. You have armies at your disposal though, and if you allocate the most armies on a castle you can capture it. Both you and your opponent have a ", B("total sum of 100 armies", klass="text-gray-500"), ". Where will you place your armies?", klass="pb-4 text-gray-400 text-xl"),
@@ -236,11 +236,11 @@ def getlogs(request):
             H1("PyData 2024 Challenge", klass="text-6xl font-bold pb-4"),
             Details(
                 Summary("Curious to learn what you can win?", klass="text-blue-500 font-bold"),
-                Img(src="/static/prize.png", width=200),
+                Img(src="/static/IMG_0953.png", width=600),
             ),
             H1("Become a winner!", klass="text-3xl font-bold pb-4"),
             P("Have you faced the computer and did you manage to win long term? Dare to compete on a grand scale against your fellow humans? Enter the tournament below to find out!", klass="pb-4 text-gray-400 text-xl"),
-            P("Hint: simulations might be helpful, but streetsmarts typically beats booksmarts. Be sure to think about the actual problem that you are trying to solve here.", klass="pb-4 text-gray-400 text-xl"),
+            P("Hint: simulations in a notebook might be helpful, so is game theory, but streetsmarts typically beats booksmarts. Be sure to think about the actual problem that you are trying to solve here. When it is time to pick the winner, we will select the highest performing score listed on this site. To identify yourself, be sure that you can show us your browser window with your best performing score.", klass="pb-4 text-gray-400 text-xl"),
             P("If you want to discuss the challenge, or if you think something broke, feel free to join and ping us on our ", A("Discord", href="https://discord.gg/wcvrjNX8", klass="text-blue-500 font-bold"), '.', klass="text-xl text-gray-400"), 
             Br(),
             Form(
